@@ -731,7 +731,7 @@
                         <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i>
                     </div>
                     <span id="statTotal" class="text-2xl font-black text-slate-900">0</span>
-                    <span class="text-[11px] text-slate-400 block mt-1">Gelombang 1 Active</span>
+                    <span class="text-[11px] text-slate-400 block mt-1">Sesuai Filter Aktif</span>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -766,9 +766,14 @@
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <!-- Table Controls -->
                 <div class="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/50">
-                    <div class="relative w-full md:w-80">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="Cari Nama / No Reg / Ortu..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <div class="relative w-full md:w-64">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="Cari Nama / No Reg / Ortu..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <select id="adminWaveFilter" onchange="renderAdminTable()" class="px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="ALL">Semua Gelombang</option>
+                        </select>
                     </div>
                     
                     <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
@@ -789,6 +794,7 @@
                                 <th class="p-3.5">Status Bayar (200k)</th>
                                 <th class="p-3.5">Jadwal Asesmen</th>
                                 <th class="p-3.5">Nilai & Rekomendasi</th>
+                                <th class="p-3.5 text-center">Berkas</th>
                                 <th class="p-3.5 text-center">Keputusan Akhir</th>
                                 <th class="p-3.5 text-right">Aksi</th>
                             </tr>
@@ -1281,6 +1287,19 @@ function setupDatabase() {
             }
         }
 
+        window.previewBase64File = function(base64Data) {
+            if (!base64Data || base64Data === 'undefined' || base64Data === 'null') {
+                showToast("File belum diunggah atau tidak tersedia di sesi ini.", "error");
+                return;
+            }
+            const newTab = window.open();
+            if (newTab) {
+                newTab.document.write(`<iframe src="${base64Data}" width="100%" height="100%" style="border:none; margin:0; padding:0;"></iframe>`);
+            } else {
+                showToast("Pop-up diblokir browser! Tolong izinkan pop-up.", "error");
+            }
+        };
+
         // Master Multi-Wave Configuration Engine
         let wavesList = [
             {
@@ -1368,6 +1387,20 @@ function setupDatabase() {
 
             const elUserQuotaTot = document.getElementById('userQuotaTotal');
             if (elUserQuotaTot) elUserQuotaTot.innerText = activeWave.totalQuota;
+
+            // Update admin wave filter dropdown
+            const waveFilterDropdown = document.getElementById('adminWaveFilter');
+            if (waveFilterDropdown) {
+                const currentVal = waveFilterDropdown.value;
+                let opts = '<option value="ALL">Semua Gelombang</option>';
+                wavesList.forEach(w => {
+                    opts += `<option value="${w.id}">${w.name}</option>`;
+                });
+                waveFilterDropdown.innerHTML = opts;
+                if (wavesList.some(w => w.id === currentVal) || currentVal === 'ALL') {
+                    waveFilterDropdown.value = currentVal;
+                }
+            }
         }
 
         function onWaveSelectChange() {
@@ -1421,7 +1454,140 @@ function setupDatabase() {
             showToast("Instruksi & Kode Backend GAS disalin!");
         }
 
-        const dummyApplicantsSample = [];
+        const dummyApplicantsSample = [
+            {
+                id: 'PMBM-2027-001',
+                waveId: 'wave-1',
+                name: 'Muhammad Rayyan Al-Fatih',
+                nickname: 'Rayyan',
+                gender: 'Laki-laki',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2019-05-14',
+                sekolahAsal: 'RA Al-Irsyad',
+                statusAbk: 'Non-ABK / Reguler',
+                detailAbk: '',
+                nik: '6371011405190001',
+                ayah: 'Ahmad Fauzi, S.T.',
+                pekerjaanAyah: 'Karyawan Swasta',
+                penghasilanAyah: '2 - 5 Juta',
+                ibu: 'Siti Nurhaliza',
+                wa: '08125551234',
+                alamat: 'Jl. Sultan Adam Banjarmasin',
+                paymentStatus: 'VERIFIED',
+                paymentFile: 'bukti_transfer.jpg',
+                paymentFileUrl: 'https://placehold.co/400x600/059669/ffffff?text=Bukti+Transfer+200k',
+                paymentTime: '26 Agu 2026 10:00',
+                formCompleted: true,
+                scheduleDate: null,
+                kkFileName: 'KK_Rayyan.pdf',
+                kkFileBase64: 'data:text/plain;base64,S0sgRHVtbXk=', 
+                aktaFileName: 'Akta_Rayyan.pdf',
+                aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teQ==', 
+                finalStatus: 'MENUNGGU',
+                scoreCompleted: false
+            },
+            {
+                id: 'PMBM-2027-002',
+                waveId: 'wave-2',
+                name: 'Aisyah Putri Azzahra',
+                nickname: 'Aisyah',
+                gender: 'Perempuan',
+                birthPlace: 'Banjarbaru',
+                birthDate: '2019-08-20',
+                sekolahAsal: 'TK Pembina',
+                statusAbk: 'Non-ABK / Reguler',
+                nik: '6371011408190002',
+                ayah: 'Budi Santoso',
+                pekerjaanAyah: 'PNS',
+                wa: '08534449999',
+                paymentStatus: 'PENDING',
+                paymentFile: 'transfer_bsi_aisyah.png',
+                paymentFileUrl: 'https://placehold.co/400x600/f59e0b/ffffff?text=Bukti+Transfer+Aisyah',
+                paymentTime: '26 Agu 2026 21:00',
+                formCompleted: false,
+                finalStatus: 'MENUNGGU',
+                scoreCompleted: false
+            },
+            {
+                id: 'PMBM-2027-003',
+                waveId: 'wave-1',
+                name: 'Bima Satria Garuda',
+                nickname: 'Bima',
+                gender: 'Laki-laki',
+                birthPlace: 'Martapura',
+                birthDate: '2019-11-05',
+                sekolahAsal: 'PAUD Melati',
+                statusAbk: 'Non-ABK / Reguler',
+                nik: '6371011411190003',
+                ayah: 'Hendro',
+                wa: '08198887777',
+                paymentStatus: 'UNPAID',
+                formCompleted: false,
+                finalStatus: 'MENUNGGU',
+                scoreCompleted: false
+            },
+            {
+                id: 'PMBM-2027-004',
+                waveId: 'wave-2',
+                name: 'Fatimah Az-Zahra',
+                nickname: 'Fatimah',
+                gender: 'Perempuan',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2019-01-10',
+                sekolahAsal: 'RA Al-Irsyad',
+                statusAbk: 'Non-ABK / Reguler',
+                nik: '6371011401190004',
+                ayah: 'Usman',
+                wa: '08123332222',
+                paymentStatus: 'VERIFIED',
+                formCompleted: true,
+                scheduleDate: '2026-08-30',
+                scheduleTime: '08:00 - 09:00',
+                scheduleLoc: 'Ruang 1',
+                kkFileName: 'KK_Fatimah.jpg',
+                kkFileBase64: 'data:text/plain;base64,S0sgRHVtbXk=',
+                aktaFileName: 'Akta_Fatimah.jpg',
+                aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teQ==',
+                scoreCompleted: true,
+                scoreMotorik: 95,
+                scoreBahasa: 90,
+                scoreHijaiyah: 95,
+                scoreKomitmen: 90,
+                scoreKesepahaman: 95,
+                totalScore: 93,
+                jilidResult: 'Tartili Jilid 4',
+                recommendation: 'Sangat Direkomendasikan',
+                finalStatus: 'LULUS'
+            },
+            {
+                id: 'PMBM-2027-005',
+                waveId: 'wave-1',
+                name: 'Daffa Rizky',
+                nickname: 'Daffa',
+                gender: 'Laki-laki',
+                birthPlace: 'Banjarmasin',
+                birthDate: '2019-03-15',
+                sekolahAsal: 'TK IT Ukhuwah',
+                statusAbk: 'ABK - ADHD / GPPH',
+                detailAbk: 'Sangat aktif, butuh instruksi berulang',
+                nik: '6371011403190005',
+                ayah: 'Rizky Firdaus',
+                wa: '08215556666',
+                paymentStatus: 'VERIFIED',
+                formCompleted: true,
+                scheduleDate: '2026-08-31',
+                scheduleTime: '10:00 - 11:00',
+                scheduleLoc: 'Ruang Inklusi',
+                kkFileName: 'KK_Daffa.pdf',
+                kkFileBase64: 'data:text/plain;base64,S0sgRHVtbXk=',
+                aktaFileName: 'Akta_Daffa.pdf',
+                aktaFileBase64: 'data:text/plain;base64,QWt0YSBEdW1teQ==',
+                abkSuratName: 'Surat_Psikolog_Daffa.pdf',
+                abkSuratBase64: 'data:text/plain;base64,U3VyYXQgRG9rdGVyIER1bW15',
+                finalStatus: 'MENUNGGU',
+                scoreCompleted: false
+            }
+        ];
 
         let applicantsData = [...dummyApplicantsSample];
 
@@ -1650,6 +1816,7 @@ function setupDatabase() {
             const newId = `PMBM-2027-00${applicantsData.length + 1}`;
             const newCandidate = {
                 id: newId,
+                waveId: getActiveWave().id,
                 name: name,
                 nickname: name.split(' ')[0],
                 gender: 'Laki-laki',
@@ -1992,11 +2159,20 @@ function setupDatabase() {
             if (!tbody) return;
 
             const searchKey = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
+            const waveFilter = document.getElementById('adminWaveFilter')?.value || 'ALL';
+            
             let filtered = applicantsData.filter(item => {
                 const matchSearch = item.name.toLowerCase().includes(searchKey) || item.id.toLowerCase().includes(searchKey) || (item.ayah && item.ayah.toLowerCase().includes(searchKey));
-                if (currentTableFilter === 'PENDING') return matchSearch && item.paymentStatus === 'PENDING';
-                if (currentTableFilter === 'VERIFIED') return matchSearch && item.paymentStatus === 'VERIFIED';
-                return matchSearch;
+                
+                // Fallback to 'wave-1' for older data without waveId
+                const itemWaveId = item.waveId || 'wave-1';
+                const matchWave = waveFilter === 'ALL' || itemWaveId === waveFilter;
+                
+                if (!matchSearch || !matchWave) return false;
+
+                if (currentTableFilter === 'PENDING') return item.paymentStatus === 'PENDING';
+                if (currentTableFilter === 'VERIFIED') return item.paymentStatus === 'VERIFIED';
+                return true;
             });
 
             document.getElementById('statTotal').innerText = applicantsData.length;
@@ -2005,7 +2181,7 @@ function setupDatabase() {
             document.getElementById('statPassed').innerText = applicantsData.filter(a => a.finalStatus === 'LULUS').length;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">Belum ada data calon murid terdaftar.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Belum ada data calon murid terdaftar.</td></tr>`;
                 return;
             }
 
@@ -2023,6 +2199,24 @@ function setupDatabase() {
 
                 let recColorClass = (item.recommendation && item.recommendation.toLowerCase() === 'tidak lulus') ? 'text-rose-600' : 'text-emerald-600';
                 let scoreCell = item.scoreCompleted ? `<div class="text-[11px]"><span class="font-bold text-slate-900">Skor: ${item.totalScore}</span> <span class="${recColorClass} block text-[10px]">${item.recommendation}</span></div>` : `<span class="text-[11px] text-slate-400 italic">Belum Diuji</span>`;
+
+                let berkasCell = '<div class="flex flex-col gap-1 min-w-[70px]">';
+                if (item.kkFileBase64 || item.kkFileName) {
+                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.kkFileBase64}')" class="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-1 w-full" title="${item.kkFileName || 'KK'}"><i data-lucide="file-text" class="w-3 h-3"></i> KK</button>`;
+                } else {
+                    berkasCell += `<span class="text-[10px] text-slate-400 italic text-center block bg-slate-50 border border-slate-100 rounded px-1 py-0.5">KK (-)</span>`;
+                }
+                
+                if (item.aktaFileBase64 || item.aktaFileName) {
+                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.aktaFileBase64}')" class="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-1 w-full mt-1" title="${item.aktaFileName || 'Akta'}"><i data-lucide="file-text" class="w-3 h-3"></i> Akta</button>`;
+                } else {
+                    berkasCell += `<span class="text-[10px] text-slate-400 italic text-center block bg-slate-50 border border-slate-100 rounded px-1 py-0.5 mt-1">Akta (-)</span>`;
+                }
+
+                if (item.abkSuratBase64 || item.abkSuratName) {
+                    berkasCell += `<button type="button" onclick="window.previewBase64File('${item.abkSuratBase64}')" class="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded hover:bg-amber-100 border border-amber-300 flex items-center justify-center gap-1 w-full mt-1" title="${item.abkSuratName || 'Surat Medis'}"><i data-lucide="file-plus" class="w-3 h-3"></i> Medis</button>`;
+                }
+                berkasCell += '</div>';
 
                 let statusDropdown = `
                     <select onchange="setFinalStatus('${item.id}', this.value)" class="text-xs font-bold border border-slate-300 rounded-lg px-2 py-1 ${item.finalStatus === 'LULUS' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : (item.finalStatus === 'TIDAK_LULUS' ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-700')}">
@@ -2046,6 +2240,7 @@ function setupDatabase() {
                         <td class="p-3.5">${payBadge}</td>
                         <td class="p-3.5">${schedCell}</td>
                         <td class="p-3.5">${scoreCell}</td>
+                        <td class="p-3.5">${berkasCell}</td>
                         <td class="p-3.5 text-center">${statusDropdown}</td>
                         <td class="p-3.5 text-right">
                             <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700" title="Detail Bukti Transfer">
