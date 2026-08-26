@@ -47,14 +47,19 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         @media print {
-            body { background: white !important; color: black !important; }
+            @page { size: A4; margin: 8mm; }
+            body, html { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
             body > *:not(#modalPrintCard) { display: none !important; }
             #modalPrintCard {
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important;
+                display: block !important; position: static !important; left: auto !important; top: auto !important;
                 width: 100% !important; height: auto !important; background: white !important;
-                padding: 0 !important; margin: 0 !important; overflow: visible !important; z-index: 99999 !important; box-shadow: none !important;
+                padding: 0 !important; margin: 0 !important; overflow: visible !important; z-index: auto !important; box-shadow: none !important;
             }
-            #modalPrintCard > div { box-shadow: none !important; max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; }
+            #modalPrintCard > div { 
+                box-shadow: none !important; max-width: 100% !important; width: 100% !important; 
+                margin: 0 !important; padding: 0 !important; border: none !important; 
+                position: static !important; transform: none !important; max-height: none !important;
+            }
             .print-hidden, .print\:hidden { display: none !important; }
         }
     </style>
@@ -2265,96 +2270,65 @@
             
             printContent.innerHTML = `
                 <!-- Kop Surat Official -->
-                <div class="flex flex-col items-center justify-center text-center pb-4 border-b-2 border-emerald-600 space-y-3">
-                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-16 h-16 object-contain drop-shadow-sm">
+                <div class="flex flex-col items-center justify-center text-center pb-3 border-b-2 border-emerald-600 space-y-2">
+                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-14 h-14 object-contain">
                     <div>
-                        <h2 class="text-lg font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
-                        <p class="text-[11px] text-slate-600 font-semibold mt-0.5">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
-                        <p class="text-[10px] text-slate-500 mt-0.5">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | WA: 08-5151-2121-56</p>
+                        <h2 class="text-base font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
+                        <p class="text-[10px] text-slate-600 font-semibold">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
+                        <p class="text-[9px] text-slate-500">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | WA: 08-5151-2121-56</p>
                     </div>
                 </div>
 
                 <!-- Title -->
-                <div class="text-center py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">KARTU PESERTA OBSERVASI & WAWANCARA PMBM</h3>
-                    <p class="text-[11px] text-emerald-700 font-bold mt-0.5">${activeWave.name}</p>
+                <div class="text-center py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-wide">KARTU PESERTA OBSERVASI & WAWANCARA PMBM</h3>
+                    <p class="text-[10px] text-emerald-700 font-bold">${activeWave.name}</p>
                 </div>
 
                 <!-- Grid Data Calon Murid & Jadwal -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
-                    <!-- Left: Data Calon Murid (7 cols) -->
-                    <div class="md:col-span-7 bg-slate-50/70 p-4 rounded-xl border border-slate-200 space-y-2">
-                        <h4 class="font-bold text-slate-800 uppercase text-[11px] border-b pb-1 text-emerald-700 flex items-center gap-1">
-                            <i data-lucide="user" class="w-3.5 h-3.5"></i> Data Calon Murid
-                        </h4>
-                        <div class="space-y-1.5 pt-1">
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">No. Registrasi</span><span class="col-span-7 font-mono font-bold text-emerald-700">: ${user.id}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Nama Lengkap</span><span class="col-span-7 font-bold text-slate-900">: ${user.name}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">NIK Siswa</span><span class="col-span-7 font-mono">: ${user.nik || '-'}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Jenis Kelamin</span><span class="col-span-7">: ${user.gender || 'Laki-laki'}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Tempat, Tgl Lahir</span><span class="col-span-7">: ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Sekolah Asal</span><span class="col-span-7">: ${user.sekolahAsal || '-'}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">Nama Orang Tua</span><span class="col-span-7 font-semibold">: ${user.ayah || '-'}</span></div>
-                            <div class="grid grid-cols-12 gap-1"><span class="col-span-5 text-slate-500">No. WhatsApp</span><span class="col-span-7">: ${user.wa || '-'}</span></div>
-                        </div>
+                <div class="grid grid-cols-2 gap-3 text-[11px]">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                        <h4 class="font-bold text-emerald-700 uppercase text-[10px] border-b pb-1">Data Calon Murid</h4>
+                        <p><strong>No. Reg:</strong> <span class="font-mono text-emerald-700">${user.id}</span></p>
+                        <p><strong>Nama:</strong> ${user.name}</p>
+                        <p><strong>NIK:</strong> ${user.nik || '-'}</p>
+                        <p><strong>TTL:</strong> ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</p>
+                        <p><strong>Wali:</strong> ${user.ayah || '-'}</p>
                     </div>
-
-                    <!-- Right: Jadwal & Ruangan (5 cols) -->
-                    <div class="md:col-span-5 bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3 flex flex-col justify-between">
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-1.5 flex flex-col justify-between">
                         <div>
-                            <h4 class="font-bold text-blue-900 uppercase text-[11px] border-b border-blue-200 pb-1 flex items-center gap-1">
-                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Jadwal Asesmen
-                            </h4>
-                            <div class="mt-2 space-y-2">
-                                <div>
-                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Tanggal Observasi:</span>
-                                    <span class="font-bold text-sm text-slate-900">${formatDateReadable(user.scheduleDate || '2027-08-22')}</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Waktu / Sesi:</span>
-                                    <span class="font-bold text-xs text-slate-800">${user.scheduleTime || '08:30 - 10:00 WITA'}</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-blue-700 block font-semibold uppercase">Lokasi Ruangan:</span>
-                                    <span class="font-bold text-xs text-slate-800">${user.scheduleLoc || 'Aula Utama MI Al-Irsyad Banjarmasin'}</span>
-                                </div>
-                            </div>
+                            <h4 class="font-bold text-blue-900 uppercase text-[10px] border-b border-blue-200 pb-1">Jadwal Asesmen</h4>
+                            <p class="mt-1"><strong>Tanggal:</strong> ${formatDateReadable(user.scheduleDate || '2027-08-22')}</p>
+                            <p><strong>Waktu:</strong> ${user.scheduleTime || '08:30 - 10:00 WITA'}</p>
+                            <p><strong>Lokasi:</strong> ${user.scheduleLoc || 'Aula Utama MI Al-Irsyad'}</p>
                         </div>
-
-                        <div class="pt-2 border-t border-blue-200 text-center">
-                            <span class="inline-block px-2.5 py-1 bg-blue-600 text-white font-bold text-[10px] rounded-lg">Wajib Hadir Tatap Muka</span>
-                        </div>
+                        <span class="text-center bg-blue-600 text-white font-bold text-[9px] py-1 rounded">Wajib Hadir Tatap Muka</span>
                     </div>
                 </div>
 
-                <!-- Tata Tertib & Ketentuan -->
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1.5">
-                    <h4 class="font-bold text-slate-800 uppercase text-[10px] flex items-center gap-1">
-                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600"></i> Petunjuk & Tata Tertib Peserta:
-                    </h4>
+                <!-- Tata Tertib -->
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-[10px] space-y-1">
+                    <h4 class="font-bold text-slate-800 uppercase">Petunjuk & Tata Tertib:</h4>
                     <ol class="list-decimal list-inside text-slate-600 space-y-0.5">
-                        <li>Hadir sesuai dengan jadwal yang telah ditentukan.</li>
-                        <li>Hadir di lokasi madrasah 15 menit sebelum waktu observasi dimulai.</li>
-                        <li>Calon murid wajib didampingi oleh kedua orang tua / wali kandung.</li>
+                        <li>Hadir 15 menit sebelum waktu observasi dimulai.</li>
+                        <li>Didampingi oleh orang tua / wali kandung.</li>
                     </ol>
                 </div>
 
-                <!-- Footer Tanda Tangan & QR Code -->
-                <div class="flex justify-between items-end pt-4 border-t border-slate-200 text-xs">
-                    <div class="text-center space-y-1">
-                        <div class="w-20 h-20 bg-slate-100 border border-slate-300 rounded-lg p-1 flex items-center justify-center mx-auto">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(user.id + '_' + user.name)}" alt="QR Verifikasi" class="w-full h-full object-contain" onerror="this.outerHTML='<span class=\'text-[9px] text-slate-400 font-mono\'>[QR VERIFIED]</span>'">
+                <!-- Footer Tanda Tangan & QR -->
+                <div class="flex justify-between items-end pt-3 border-t text-[11px]">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-slate-100 border rounded p-0.5 flex items-center justify-center mx-auto">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(user.id + '_' + user.name)}" alt="QR" class="w-full h-full object-contain">
                         </div>
-                        <span class="text-[9px] text-slate-400 font-mono block">Kode Autentikasi PMBM</span>
+                        <span class="text-[8px] font-mono text-slate-400 block mt-0.5">Autentikasi PMBM</span>
                     </div>
-
-                    <div class="text-center space-y-8">
+                    <div class="text-center space-y-6">
                         <div>
-                            <p class="text-[11px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
-                            <p class="text-xs font-bold text-slate-800">Panitia PMBM MI Al-Irsyad</p>
+                            <p class="text-[10px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
+                            <p class="text-[11px] font-bold text-slate-800">Panitia PMBM MI Al-Irsyad</p>
                         </div>
-                        <div class="border-b border-slate-800 w-36 mx-auto"></div>
-                        <p class="text-[10px] text-slate-500 font-medium">NIP / ID Panitia: -</p>
+                        <div class="border-b border-slate-800 w-32 mx-auto"></div>
                     </div>
                 </div>
             `;
@@ -2371,56 +2345,52 @@
             
             printContent.innerHTML = `
                 <!-- Kop Surat Official -->
-                <div class="flex flex-col items-center justify-center text-center pb-4 border-b-2 border-emerald-600 space-y-3">
-                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-16 h-16 object-contain drop-shadow-sm">
+                <div class="flex flex-col items-center justify-center text-center pb-3 border-b-2 border-emerald-600 space-y-2">
+                    <img src="https://imgh.in/host/7sfkdf" alt="Logo MI" class="w-14 h-14 object-contain">
                     <div>
-                        <h2 class="text-lg font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
-                        <p class="text-[11px] text-slate-600 font-semibold mt-0.5">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
-                        <p class="text-[10px] text-slate-500 mt-0.5">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | Akreditasi B+</p>
+                        <h2 class="text-base font-black tracking-tight text-slate-900 uppercase">MI AL-IRSYAD AL-ISLAMIYYAH BANJARMASIN</h2>
+                        <p class="text-[10px] text-slate-600 font-semibold">Panitia Penerimaan Murid Baru Madrasah (PMBM)</p>
+                        <p class="text-[9px] text-slate-500">Jl. Sulawesi No. 5, Ps.Lama, Banjarmasin Tengah | Akreditasi B+</p>
                     </div>
                 </div>
 
-                <div class="text-center py-3">
-                    <h3 class="text-base font-black text-slate-900 uppercase tracking-wide border-b-2 border-slate-800 inline-block px-4 pb-1">SURAT KETERANGAN LULUS SELEKSI</h3>
-                    <p class="text-xs text-slate-500 mt-1">Nomor: 045/PAN-PMBM/MI-ALIRSYAD/2027</p>
+                <div class="text-center py-2">
+                    <h3 class="text-sm font-black text-slate-900 uppercase border-b-2 border-slate-800 inline-block px-3 pb-0.5">SURAT KETERANGAN LULUS SELEKSI</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Nomor: 045/PAN-PMBM/MI-ALIRSYAD/2027</p>
                 </div>
 
-                <div class="text-xs leading-relaxed space-y-3 text-slate-800">
-                    <p>Yang bertanda tangan di bawah ini Kepala Madrasah Ibtidaiyah Al-Irsyad Al-Islamiyyah Kota Banjarmasin menerangkan bahwa:</p>
+                <div class="text-[11px] leading-relaxed space-y-2.5 text-slate-800">
+                    <p>Kepala Madrasah Ibtidaiyah Al-Irsyad Al-Islamiyyah Kota Banjarmasin menerangkan bahwa:</p>
 
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nomor Registrasi</span><span class="col-span-8 font-mono font-bold text-emerald-700">: ${user.id}</span></div>
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nama Calon Murid</span><span class="col-span-8 font-bold text-slate-900">: ${user.name}</span></div>
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">NIK Siswa</span><span class="col-span-8 font-mono">: ${user.nik || '-'}</span></div>
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Sekolah Asal</span><span class="col-span-8">: ${user.sekolahAsal || '-'}</span></div>
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Tempat, Tanggal Lahir</span><span class="col-span-8">: ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</span></div>
-                        <div class="grid grid-cols-12"><span class="col-span-4 text-slate-500">Nama Orang Tua / Wali</span><span class="col-span-8 font-semibold">: ${user.ayah || '-'}</span></div>
-                        <div class="grid grid-cols-12 border-t border-slate-200 pt-1.5 mt-1"><span class="col-span-4 text-emerald-800 font-bold">Rekomendasi Penempatan Jilid</span><span class="col-span-8 font-black text-emerald-900">: ${user.jilidResult || 'Tartili Jilid 3'}</span></div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                        <p><strong>Nomor Registrasi:</strong> <span class="font-mono text-emerald-700">${user.id}</span></p>
+                        <p><strong>Nama Calon Murid:</strong> ${user.name}</p>
+                        <p><strong>NIK Siswa:</strong> ${user.nik || '-'}</p>
+                        <p><strong>TTL:</strong> ${user.birthPlace || 'Banjarmasin'}, ${formatDateReadable(user.birthDate)}</p>
+                        <p><strong>Nama Orang Tua / Wali:</strong> ${user.ayah || '-'}</p>
+                        <p class="border-t pt-1 mt-1 text-emerald-800 font-bold"><strong>Rekomendasi Penempatan Jilid:</strong> ${user.jilidResult || 'Tartili Jilid 3'}</p>
                     </div>
 
-                    <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-center space-y-1">
-                        <span class="text-xs font-bold text-emerald-900 uppercase">Dinyatakan</span>
-                        <h4 class="text-2xl font-black text-emerald-700">L U L U S</h4>
-                        <p class="text-[11px] text-emerald-800 font-medium">Sebagai Calon Murid Baru MI Al-Irsyad Al-Islamiyyah Banjarmasin Tahun Ajaran 2027/2028</p>
+                    <div class="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-center space-y-0.5">
+                        <span class="text-[10px] font-bold text-emerald-900 uppercase">Dinyatakan</span>
+                        <h4 class="text-xl font-black text-emerald-700">L U L U S</h4>
+                        <p class="text-[10px] text-emerald-800">Sebagai Calon Murid Baru MI Al-Irsyad Al-Islamiyyah T.A. 2027/2028</p>
                     </div>
-
-                    <p class="text-[11px] text-slate-600">Demikian Surat Keterangan Lulus ini diterbitkan untuk dipergunakan sebagaimana mestinya dan sebagai syarat melakukan registrasi daftar ulang.</p>
                 </div>
 
-                <div class="flex justify-between items-end pt-6 border-t border-slate-200 text-xs">
-                    <div class="text-center space-y-1">
-                        <div class="w-20 h-20 bg-slate-100 border border-slate-300 rounded-lg p-1 flex items-center justify-center mx-auto">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('SKL_LULUS_' + user.id + '_' + user.name + '_' + (user.jilidResult || 'Jilid3'))}" alt="QR SKL" class="w-full h-full object-contain">
+                <div class="flex justify-between items-end pt-4 border-t text-[11px]">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-slate-100 border rounded p-0.5 flex items-center justify-center mx-auto">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('SKL_LULUS_' + user.id)}" alt="QR" class="w-full h-full object-contain">
                         </div>
-                        <span class="text-[9px] text-slate-400 font-mono block">Verifikasi SKL Digital</span>
+                        <span class="text-[8px] font-mono text-slate-400 block mt-0.5">Verifikasi SKL</span>
                     </div>
-
-                    <div class="text-center space-y-10">
+                    <div class="text-center space-y-6">
                         <div>
-                            <p class="text-[11px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
-                            <p class="text-xs font-bold text-slate-800">Kepala MI Al-Irsyad Al-Islamiyyah</p>
+                            <p class="text-[10px] text-slate-500">Banjarmasin, ${formatDateReadable(new Date().toISOString().split('T')[0])}</p>
+                            <p class="text-[11px] font-bold text-slate-800">Kepala Madrasah</p>
                         </div>
-                        <div class="border-b border-slate-800 w-44 mx-auto"></div>
+                        <div class="border-b border-slate-800 w-36 mx-auto"></div>
                         <p class="text-[10px] text-slate-600 font-bold">M. Rizky Nugraha. A.B.,S.H.</p>
                     </div>
                 </div>
@@ -2432,57 +2402,12 @@
         }
 
         function executeBrowserPrint() {
-            const cardHtml = document.getElementById('printableCardContent')?.innerHTML;
-            if (!cardHtml) {
-                showToast("Konten dokumen tidak ditemukan!", "error");
-                return;
-            }
-
-            let iframe = document.getElementById('printIframe');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.id = 'printIframe';
-                iframe.style.position = 'absolute';
-                iframe.style.width = '0px';
-                iframe.style.height = '0px';
-                iframe.style.border = 'none';
-                document.body.appendChild(iframe);
-            }
-
-            const doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write(`
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>${currentPrintDocTitle}</title>
-                    <script src="https://cdn.tailwindcss.com"><\/script>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-                        body { font-family: 'Inter', sans-serif; background: white; color: #1e293b; padding: 40px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="max-w-2xl mx-auto space-y-6 bg-white p-6">
-                        ${cardHtml}
-                    </div>
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() {
-                                window.print();
-                            }, 400);
-                        };
-                    <\/script>
-                </body>
-                </html>
-            `);
-            doc.close();
+            window.print();
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
+            document.getElementById('modalPrintCard').classList.remove('flex');
         }
 
         function copyAccountNo() {
