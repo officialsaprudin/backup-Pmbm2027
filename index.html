@@ -1207,6 +1207,21 @@ function setupDatabase() {
         </div>
     </div>
 
+    <!-- MODAL 6: KONFIRMASI HAPUS (ADMIN) -->
+    <div id="modalConfirmDelete" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative text-center">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 border-4 border-rose-50">
+                <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-900">Hapus Data Pendaftar?</h3>
+            <p class="text-xs text-slate-500" id="deleteConfirmText">Apakah Anda yakin ingin menghapus data ini secara permanen?</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal('modalConfirmDelete')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">Batal</button>
+                <button onclick="executeDeleteApplicant()" class="w-1/2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md transition">Ya, Hapus!</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const GAS_API_URL = "TEMPEL_URL_WEB_APP_GAS_DISINI";
 
@@ -2243,9 +2258,14 @@ function setupDatabase() {
                         <td class="p-3.5">${berkasCell}</td>
                         <td class="p-3.5 text-center">${statusDropdown}</td>
                         <td class="p-3.5 text-right">
-                            <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700" title="Detail Bukti Transfer">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
+                            <div class="flex items-center justify-end gap-1">
+                                <button onclick="openPaymentProofModal('${item.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Detail Bukti Transfer">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteApplicant('${item.id}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 transition" title="Hapus Data Pendaftar">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -2765,6 +2785,30 @@ function setupDatabase() {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
+        }
+
+        let candidateToDelete = null;
+
+        function promptDeleteApplicant(id) {
+            const item = applicantsData.find(a => a.id === id);
+            if (!item) return;
+            candidateToDelete = id;
+            document.getElementById('deleteConfirmText').innerHTML = `Apakah Anda yakin menghapus pendaftar <strong>${item.name}</strong> (${item.id})? Data yang dihapus tidak dapat dikembalikan.`;
+            const modal = document.getElementById('modalConfirmDelete');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function executeDeleteApplicant() {
+            if (!candidateToDelete) return;
+            applicantsData = applicantsData.filter(a => a.id !== candidateToDelete);
+            renderAdminTable();
+            closeModal('modalConfirmDelete');
+            showToast('Data pendaftar berhasil dihapus permanen!');
+            
+            sendToBackend('DELETE_USER', { id: candidateToDelete });
+            candidateToDelete = null;
         }
 
         function copyToClipboard(text) {
